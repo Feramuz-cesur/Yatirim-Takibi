@@ -1,9 +1,9 @@
-const axios = require('axios');
-const cheerio = require('cheerio');
+import axios from 'axios';
+import * as cheerio from 'cheerio';
 
 const BASE_URL = 'https://anlikaltinfiyatlari.com';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   try {
@@ -24,4 +24,4 @@ module.exports = async function handler(req, res) {
   } catch (error) {
     res.status(500).json({ error: 'Bankalar çekilemedi.' });
   }
-};
+}
