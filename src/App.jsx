@@ -4,7 +4,7 @@ import { db } from './firebase';
 import './index.css';
 
 function App() {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+  const API_URL = import.meta.env.VITE_API_URL || '/api';
   
   const [banks, setBanks] = useState([]);
   const [rates, setRates] = useState({}); // { bankSlug: { buyPrice, sellPrice } }
