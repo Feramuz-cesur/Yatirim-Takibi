@@ -19,17 +19,15 @@ export default async function handler(req, res) {
     $('tr').each((i, row) => {
       const columns = $(row).find('td');
       if (columns.length >= 3) {
-        const title = $(columns[0]).text().trim().toLowerCase();
+        let title = $(columns[0]).text().toLowerCase();
+        title = title.replace(/\n/g, '').replace(/\s+/g, ' ').trim();
         
         // Exact match for 'gram altın'
-        if (title === 'gram altın' || title === 'gram altin') {
-          // Generally columns are: [0] Name, [1] Current, [2] Change, [3] Alış, [4] Satış
-          // But fallback to [1] and [2] if it's a 3 column table.
-          
+        if (title.startsWith('gram altın') || title.startsWith('gram altin')) {
           let rawBuy = '';
           let rawSell = '';
           
-          if (columns.length >= 5) {
+          if (columns.length >= 5 && $(columns[3]).text().trim() !== '') {
             rawBuy = $(columns[3]).text();
             rawSell = $(columns[4]).text();
           } else {
@@ -37,13 +35,23 @@ export default async function handler(req, res) {
             rawSell = $(columns[2]).text();
           }
 
-          const parsedBuy = parseFloat(rawBuy.replace(/[^0-9,]/g, '').replace(',', '.'));
-          const parsedSell = parseFloat(rawSell.replace(/[^0-9,]/g, '').replace(',', '.'));
+          const extractPrice = (str) => {
+              let val = str.trim().split(/[\s\n]+/)[0];
+              if (!val) return 0;
+              // If it uses comma as decimal separator e.g 3.000,50 -> 3000.50
+              if (val.includes(',')) {
+                  val = val.replace(/\./g, '').replace(',', '.');
+              }
+              return parseFloat(val) || 0;
+          };
+
+          const parsedBuy = extractPrice(rawBuy);
+          const parsedSell = extractPrice(rawSell);
 
           if (parsedBuy > 0) buyPrice = parsedBuy;
           if (parsedSell > 0) sellPrice = parsedSell;
           
-          return false; // Break out of loop since we found it
+          return false; // Break out
         }
       }
     });
