@@ -17,14 +17,33 @@ export default async function handler(req, res) {
     let sellPrice = 0;
 
     $('tr').each((i, row) => {
-      const text = $(row).text().toLowerCase();
-      if (text.includes('gram') && text.includes('altın')) {
-        const columns = $(row).find('td');
-        if (columns.length >= 3) {
-          const col1 = parseFloat($(columns[1]).text().replace(/[^0-9,]/g, '').replace(',', '.'));
-          const col2 = parseFloat($(columns[2]).text().replace(/[^0-9,]/g, '').replace(',', '.'));
-          if (col1 > 0) buyPrice = col1;
-          if (col2 > 0) sellPrice = col2;
+      const columns = $(row).find('td');
+      if (columns.length >= 3) {
+        const title = $(columns[0]).text().trim().toLowerCase();
+        
+        // Exact match for 'gram altın'
+        if (title === 'gram altın' || title === 'gram altin') {
+          // Generally columns are: [0] Name, [1] Current, [2] Change, [3] Alış, [4] Satış
+          // But fallback to [1] and [2] if it's a 3 column table.
+          
+          let rawBuy = '';
+          let rawSell = '';
+          
+          if (columns.length >= 5) {
+            rawBuy = $(columns[3]).text();
+            rawSell = $(columns[4]).text();
+          } else {
+            rawBuy = $(columns[1]).text();
+            rawSell = $(columns[2]).text();
+          }
+
+          const parsedBuy = parseFloat(rawBuy.replace(/[^0-9,]/g, '').replace(',', '.'));
+          const parsedSell = parseFloat(rawSell.replace(/[^0-9,]/g, '').replace(',', '.'));
+
+          if (parsedBuy > 0) buyPrice = parsedBuy;
+          if (parsedSell > 0) sellPrice = parsedSell;
+          
+          return false; // Break out of loop since we found it
         }
       }
     });
